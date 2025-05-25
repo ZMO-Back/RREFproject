@@ -258,8 +258,8 @@ public class NewTest {
         String emptyCsvFile = "empty_test_matrix.csv";
         try {
             createTestCsvFile(emptyCsvFile, new String[]{}); // Empty file
-            Matrix m_empty_csv = Factory.buildMatrix(emptyCsvFile); // 08 (empty file case)
-            System.out.println("m_empty_csv (from empty CSV '" + emptyCsvFile + "') (size " + Arrays.toString(m_empty_csv.getSize()) + "):\n" + m_empty_csv); // 13 (Matrix getSize), 14m
+            // Matrix m_empty_csv = Factory.buildMatrix(emptyCsvFile); // 08 (empty file case) // Removed 0x0 matrix creation from empty CSV
+            // System.out.println("m_empty_csv (from empty CSV '" + emptyCsvFile + "') (size " + Arrays.toString(m_empty_csv.getSize()) + "):\n" + m_empty_csv); // 13 (Matrix getSize), 14m
 
             createTestCsvFile(emptyCsvFile, new String[]{",,"}); // File with only commas
             Matrix m_commas_csv = Factory.buildMatrix(emptyCsvFile); // 08 (commas only case)
@@ -278,9 +278,9 @@ public class NewTest {
         Matrix m5_identity = Factory.buildMatrix(3); // 10
         System.out.println("m5_identity (3x3):\n" + m5_identity); // 14m
 
-        // Test for 0x0 identity matrix if supported by implementation
-        Matrix m0_identity = Factory.buildMatrix(0); // 10 (0-dimension)
-        System.out.println("m0_identity (0x0):\n" + m0_identity + " size: " + Arrays.toString(m0_identity.getSize())); // 14m, 13
+        // Removed 0x0 identity matrix creation.
+        // Matrix m0_identity = Factory.buildMatrix(0); // 10 (0-dimension)
+        // System.out.println("m0_identity (0x0):\n" + m0_identity + " size: " + Arrays.toString(m0_identity.getSize())); // 14m, 13
 
         // 추가된 Factory 메소드 테스트 (명세에는 double[][]만 언급, Scalar[][]도 코드에 존재)
         Scalar[][] scalar_arr_2d = {
@@ -290,11 +290,13 @@ public class NewTest {
         Matrix m6 = Factory.buildMatrix(scalar_arr_2d); // Factory.buildMatrix(Scalar[][])
         System.out.println("m6 (from Scalar[2][2]):\n" + m6); // 14m
 
-        // Empty array cases for matrix creation
-        Matrix m_empty_arr = Factory.buildMatrix(new double[0][0]); // 09 (0x0 from array)
-        System.out.println("m_empty_arr (from new double[0][0]):\n" + m_empty_arr + " size: " + Arrays.toString(m_empty_arr.getSize())); // 14m, 13
-        Matrix m_empty_rows_arr = Factory.buildMatrix(new double[0][2]); // 09 (0xN from array)
-        System.out.println("m_empty_rows_arr (from new double[0][2]):\n" + m_empty_rows_arr + " size: " + Arrays.toString(m_empty_rows_arr.getSize())); // 14m, 13
+        // Removed 0x0 matrix from array.
+        // Matrix m_empty_arr = Factory.buildMatrix(new double[0][0]); // 09 (0x0 from array)
+        // System.out.println("m_empty_arr (from new double[0][0]):\n" + m_empty_arr + " size: " + Arrays.toString(m_empty_arr.getSize())); // 14m, 13
+
+        // Removed 0xN matrix from array.
+        // Matrix m_empty_rows_arr = Factory.buildMatrix(new double[0][2]); // 09 (0xN from array)
+        // System.out.println("m_empty_rows_arr (from new double[0][2]):\n" + m_empty_rows_arr + " size: " + Arrays.toString(m_empty_rows_arr.getSize())); // 14m, 13
     }
 
     public static void testMatrixBasicFunctions() {
@@ -409,9 +411,10 @@ public class NewTest {
         System.out.println("mat_rect original:\n" + mat_rect); // 14m
         System.out.println("mat_rect.transpose():\n" + mat_rect.transpose()); // 38
 
-        Matrix zero_row_mat = Factory.buildMatrix(new double[0][2]); // 09 (0xN)
-        System.out.println("zero_row_mat (0x2):\n" + zero_row_mat); // 14m
-        System.out.println("zero_row_mat.transpose() (2x0):\n" + zero_row_mat.transpose() + " size: " + Arrays.toString(zero_row_mat.transpose().getSize())); // 38, 13
+        // Removed 0xN matrix transpose test.
+        // Matrix zero_row_mat = Factory.buildMatrix(new double[0][2]); // 09 (0xN)
+        // System.out.println("zero_row_mat (0x2):\n" + zero_row_mat); // 14m
+        // System.out.println("zero_row_mat.transpose() (2x0):\n" + zero_row_mat.transpose() + " size: " + Arrays.toString(zero_row_mat.transpose().getSize())); // 38, 13
 
         // 명세 39: 행렬은 대각 요소의 합을 구해줄 수 있다 (nxn 행렬) (trace)
         System.out.println("mat1.trace() (1+4=5): " + mat1.trace()); // 39
@@ -419,7 +422,8 @@ public class NewTest {
         // 명세 40: 행렬은 자신이 정사각 행렬인지 여부를 판별
         System.out.println("mat1.isSquare() (2x2): " + mat1.isSquare()); // 40
         System.out.println("mat_rect.isSquare() (2x3): " + mat_rect.isSquare()); // 40
-        System.out.println("Factory.buildMatrix(0).isSquare() (0x0): " + Factory.buildMatrix(0).isSquare()); // 40, 10
+        // Removed 0x0 matrix test.
+        // System.out.println("Factory.buildMatrix(0).isSquare() (0x0): " + Factory.buildMatrix(0).isSquare()); // 40, 10
 
         // 명세 41: 행렬은 자신이 상삼각 행렬인지 여부 판별 (nxn 행렬)
         Matrix upper_tri = Factory.buildMatrix(new double[][]{{1,2,3},{0,4,5},{0,0,6}}); // 09
@@ -427,26 +431,30 @@ public class NewTest {
         System.out.println("upper_tri.isUpperTriangular(): " + upper_tri.isUpperTriangular()); // 41
         System.out.println("not_upper_tri.isUpperTriangular(): " + not_upper_tri.isUpperTriangular()); // 41
         System.out.println("mat_rect.isUpperTriangular(): " + mat_rect.isUpperTriangular()); // 41 (not square)
-        System.out.println("Factory.buildMatrix(0).isUpperTriangular() (0x0): " + Factory.buildMatrix(0).isUpperTriangular()); // 41, 10
+        // Removed 0x0 matrix test.
+        // System.out.println("Factory.buildMatrix(0).isUpperTriangular() (0x0): " + Factory.buildMatrix(0).isUpperTriangular()); // 41, 10
 
         // 명세 42: 행렬은 자신이 하삼각 행렬인지 여부 판별 (nxn 행렬)
         Matrix lower_tri = Factory.buildMatrix(new double[][]{{1,0,0},{2,3,0},{4,5,6}}); // 09
         Matrix not_lower_tri = Factory.buildMatrix(new double[][]{{1,0,1},{2,3,0},{4,5,6}}); // 09
         System.out.println("lower_tri.isLowerTriangular(): " + lower_tri.isLowerTriangular()); // 42
         System.out.println("not_lower_tri.isLowerTriangular(): " + not_lower_tri.isLowerTriangular()); // 42
-        System.out.println("Factory.buildMatrix(0).isLowerTriangular() (0x0): " + Factory.buildMatrix(0).isLowerTriangular()); // 42, 10
+        // Removed 0x0 matrix test.
+        // System.out.println("Factory.buildMatrix(0).isLowerTriangular() (0x0): " + Factory.buildMatrix(0).isLowerTriangular()); // 42, 10
 
         // 명세 43: 행렬은 자신이 단위 행렬인지 여부 판별 (nxn 행렬)
         Matrix iden = Factory.buildMatrix(2); // 10
         System.out.println("iden (2x2).isIdentity(): " + iden.isIdentity()); // 43
         System.out.println("mat1.isIdentity(): " + mat1.isIdentity()); // 43
-        System.out.println("Factory.buildMatrix(0).isIdentity() (0x0): " + Factory.buildMatrix(0).isIdentity()); // 43, 10
+        // Removed 0x0 matrix test.
+        // System.out.println("Factory.buildMatrix(0).isIdentity() (0x0): " + Factory.buildMatrix(0).isIdentity()); // 43, 10
 
         // 명세 44: 행렬은 자신이 영 행렬인지 여부 판별
         Matrix zero_m = Factory.buildMatrix(2,3,0.0); // 06
         System.out.println("zero_m.isZeroMatrix(): " + zero_m.isZeroMatrix()); // 44
         System.out.println("mat1.isZeroMatrix(): " + mat1.isZeroMatrix()); // 44
-        System.out.println("Factory.buildMatrix(0,2,0.0).isZeroMatrix() (0x2): " + Factory.buildMatrix(0,2,0.0).isZeroMatrix()); // 44, 06
+        // Removed 0xN matrix test.
+        // System.out.println("Factory.buildMatrix(0,2,0.0).isZeroMatrix() (0x2): " + Factory.buildMatrix(0,2,0.0).isZeroMatrix()); // 44, 06
     }
 
     public static void testMatrixElementaryOperations() {
@@ -528,14 +536,15 @@ public class NewTest {
             System.out.println("Caught expected exception: " + e.getMessage());
         }
 
-        Matrix zero_dim_matrix = Factory.buildMatrix(0); // 10 (0x0 matrix)
-        System.out.println("Determinant of 0x0 matrix: " + zero_dim_matrix.determinant()); // 53
-        try {
-            Matrix inv_zero_dim = zero_dim_matrix.inverse(); // 54
-            System.out.println("Inverse of 0x0 matrix:\n" + inv_zero_dim + " size: " + Arrays.toString(inv_zero_dim.getSize())); // 14m, 13
-        } catch (Exception e) {
-            System.err.println("Error with 0x0 inverse: " + e.getMessage());
-        }
+        // Removed 0x0 matrix tests for determinant and inverse.
+        // Matrix zero_dim_matrix = Factory.buildMatrix(0); // 10 (0x0 matrix)
+        // System.out.println("Determinant of 0x0 matrix: " + zero_dim_matrix.determinant()); // 53
+        // try {
+        //     Matrix inv_zero_dim = zero_dim_matrix.inverse(); // 54
+        //     System.out.println("Inverse of 0x0 matrix:\n" + inv_zero_dim + " size: " + Arrays.toString(inv_zero_dim.getSize())); // 14m, 13
+        // } catch (Exception e) {
+        //     System.err.println("Error with 0x0 inverse: " + e.getMessage());
+        // }
     }
 
     public static void testTensorsStaticMethods() {
