@@ -84,9 +84,14 @@ public class Factory {
         return new MatrixImpl(dimension);
     }
 
-    // List<Vector> 로부터 Matrix 생성 (내부용, MatrixImpl clone 등에서 활용)
-    // Test.java에서 직접 사용하지는 않음 (구현 클래스 노출 방지)
-    static Matrix buildMatrixInternal(List<Vector> rows, boolean deepCopy) {
-        return new MatrixImpl(rows, deepCopy);
+    //
+    public static Matrix buildMatrix(List<Vector> rows) {
+        return new MatrixImpl(rows);
     }
+
+//    // List<Vector> 로부터 Matrix 생성 (내부용, MatrixImpl clone 등에서 활용)
+//    // Test.java에서 직접 사용하지는 않음 (구현 클래스 노출 방지)
+//    static Matrix buildMatrixInternal(List<Vector> rows, boolean deepCopy) {
+//        return new MatrixImpl(rows);
+//    }
 }
