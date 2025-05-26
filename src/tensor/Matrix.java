@@ -8,6 +8,8 @@ public interface Matrix extends Cloneable {
     // 또는 각 행을 Vector로 반환하는 메소드, 또는 2차원 배열로 Scalar 반환
     // 현재 MatrixImpl은 List<Vector>를 내부적으로 사용하므로, 이를 활용
 
+    List<Vector> getVectors();
+
     // 11m. 특정 위치 요소 지정
     void setElement(int rowIndex, int colIndex, Scalar value);
 
@@ -25,7 +27,7 @@ public interface Matrix extends Cloneable {
     Matrix add(Matrix other);
 
     // 23. 행렬 곱셈 (this = this * other)
-    Matrix multiply(Matrix other);
+    Matrix multiplyLeft(Matrix other);
     // 23. 행렬 곱셈 (this = other * this). 명세에 "모두 지원"
     // non-static으로 자신을 바꾸려면 multiplyLeft(Matrix otherLeft) 같은 이름이 더 적절할 수 있음.
     // 또는 multiply가 boolean 인자(multiplyOnLeft)를 받도록 설계할 수도 있음.
@@ -34,6 +36,7 @@ public interface Matrix extends Cloneable {
     // 혹은, 인터페이스에 multiplyLeft(Matrix otherLeft) 추가.
     // 여기서는 multiply(Matrix other)는 this * other로, Tensors에서 순서를 바꿔 호출하는 것으로 가정.
 
+    Matrix multiplyRight(Matrix other);
 
     // --- Advanced Matrix Functionality (mostly non-static, returning new or modifying self as specified) ---
 
