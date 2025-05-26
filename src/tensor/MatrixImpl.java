@@ -97,9 +97,7 @@ public class MatrixImpl implements Matrix {
     // 09: 2차원 double 배열로부터 생성
     MatrixImpl(double[][] arr) {
         if (arr == null || arr.length == 0) {
-            // 빈 행렬 (0x0 또는 0xN) 처리
-            this.matrixRows = new ArrayList<>();
-            return;
+            throw new IllegalArgumentException("Size 0 not allowed");
         }
         int numRows = arr.length;
         int numCols = (arr[0] == null) ? 0 : arr[0].length; // 첫 행 기준으로 열 개수 결정
@@ -116,8 +114,7 @@ public class MatrixImpl implements Matrix {
     // Scalar[][] 로부터 생성 (내부 및 Factory용)
     MatrixImpl(Scalar[][] data) {
         if (data == null || data.length == 0) {
-            this.matrixRows = new ArrayList<>(); // 0xM 행렬
-            return;
+            throw new IllegalArgumentException("Size 0 not allowed");
         }
         int numRows = data.length;
         int numCols = (data[0] == null) ? 0 : data[0].length;
@@ -151,7 +148,7 @@ public class MatrixImpl implements Matrix {
     }
 
     // List<Vector>를 직접 받는 생성자 (내부용, clone 등에서 사용)
-    MatrixImpl(List<Vector> rows, boolean deepCopy) { // deepCopy 플래그 추가
+    MatrixImpl(List<Vector> rows) { // deepCopy 플래그 추가
         if (rows == null) throw new IllegalArgumentException("Row list cannot be null.");
         // 행별로 열 개수가 동일한지 검증 필요
         if (!rows.isEmpty()) {
@@ -162,17 +159,16 @@ public class MatrixImpl implements Matrix {
                 }
             }
         }
-
-        if (deepCopy) {
-            this.matrixRows = new ArrayList<>(rows.size());
-            for (Vector rowVec : rows) {
-                this.matrixRows.add(rowVec.clone()); // 각 Vector도 복제
-            }
-        } else {
-            this.matrixRows = new ArrayList<>(rows); // 얕은 복사 (내부적으로 생성된 Vector 리스트를 사용할 때)
+        this.matrixRows = new ArrayList<>(rows.size());
+        for (Vector rowVec : rows) {
+            this.matrixRows.add(rowVec.clone()); // 각 Vector도 복제
         }
     }
 
+    @Override
+    public List<Vector> getVectors(){
+        return this.matrixRows;
+    }
 
     // 11m. 특정 위치 요소 지정
     @Override
@@ -311,64 +307,73 @@ public class MatrixImpl implements Matrix {
 
     // 23. 행렬 곱셈 (this = this * other)
     @Override
-    public Matrix multiply(Matrix other) {
+    public Matrix multiplyLeft(Matrix other) {
         if (other == null) throw new IllegalArgumentException("Other matrix cannot be null.");
-        int[] thisSize = this.getSize(); // this is R1 x C1
-        int[] otherSize = other.getSize(); // other is R2 x C2
 
-        if (thisSize[1] != otherSize[0]) {
-            throw new DimensionMismatchException(
-                    "Number of columns in this matrix (" + thisSize[1] +
-                            ") must equal the number of rows in the other matrix (" + otherSize[0] + ") for multiplication."
-            );
-        }
+        this.matrixRows = Tensors.multiply(other, this).getVectors();
+        return this;
+//        int[] thisSize = this.getSize(); // this is R1 x C1
+//        int[] otherSize = other.getSize(); // other is R2 x C2
+//
+//        if (thisSize[1] != otherSize[0]) {
+//            throw new DimensionMismatchException(
+//                    "Number of columns in this matrix (" + thisSize[1] +
+//                            ") must equal the number of rows in the other matrix (" + otherSize[0] + ") for multiplication."
+//            );
+//        }
+//
+//        // 결과 행렬의 크기는 R1 x C2
+//        int resultRows = thisSize[0];
+//        int resultCols = otherSize[1];
+//
+//        if (resultRows == 0 || resultCols == 0) { // 결과가 0xN 또는 Mx0 행렬인 경우
+//            this.matrixRows = new ArrayList<>();
+//            if (resultRows > 0) { // Mx0 결과 (열이 0개)
+//                for (int i = 0; i < resultRows; i++) {
+//                    this.matrixRows.add(Factory.buildVector(new Scalar[0])); // 빈 벡터 추가
+//                }
+//            }
+//            // 만약 resultRows가 0이면 this.matrixRows는 그냥 빈 리스트 (0xN 행렬)
+//            return this;
+//        }
+//
+//
+//        Scalar[][] resultData = new Scalar[resultRows][resultCols];
+//
+//        for (int i = 0; i < resultRows; i++) {
+//            for (int j = 0; j < resultCols; j++) {
+//                Scalar sum = Factory.buildScalar("0");
+//                for (int k = 0; k < thisSize[1]; k++) { // thisSize[1] == otherSize[0]
+//                    // sum = sum + this(i,k) * other(k,j)
+//                    // Scalar.add 와 Scalar.multiply 는 새 객체를 반환하지 않고 자신을 수정함.
+//                    // 따라서 다음과 같이 사용:
+//                    // Scalar term = this.viewElement(i,k).clone(); // 원본 보존 위해 복제
+//                    // term.multiply(other.viewElement(k,j));
+//                    // sum.add(term);
+//                    // 또는 static 메소드 사용:
+//                    sum.add(Tensors.multiply(this.viewElement(i, k), other.viewElement(k, j)));
+//                }
+//                resultData[i][j] = sum;
+//            }
+//        }
+//        // this의 내용을 resultData로 교체
+//        // MatrixImpl(Scalar[][]) 생성자를 호출하여 새 객체를 만들고 그 내부 데이터로 교체하는 방식은
+//        // this 참조 자체를 바꿀 수 없으므로, this의 내부 List<Vector>를 새로 구성해야 함.
+//        List<Vector> newRows = new ArrayList<>(resultRows);
+//        for (int i = 0; i < resultRows; i++) {
+//            List<Scalar> rowScalars = new ArrayList<>(resultCols);
+//            for (int j = 0; j < resultCols; j++) {
+//                rowScalars.add(resultData[i][j]);
+//            }
+//            newRows.add(Factory.buildVector(rowScalars)); // Factory.buildVector(List<Scalar>) 필요
+//        }
+//        this.matrixRows = newRows;
+//        return this;
+    }
 
-        // 결과 행렬의 크기는 R1 x C2
-        int resultRows = thisSize[0];
-        int resultCols = otherSize[1];
-
-        if (resultRows == 0 || resultCols == 0) { // 결과가 0xN 또는 Mx0 행렬인 경우
-            this.matrixRows = new ArrayList<>();
-            if (resultRows > 0) { // Mx0 결과 (열이 0개)
-                for (int i = 0; i < resultRows; i++) {
-                    this.matrixRows.add(Factory.buildVector(new Scalar[0])); // 빈 벡터 추가
-                }
-            }
-            // 만약 resultRows가 0이면 this.matrixRows는 그냥 빈 리스트 (0xN 행렬)
-            return this;
-        }
-
-
-        Scalar[][] resultData = new Scalar[resultRows][resultCols];
-
-        for (int i = 0; i < resultRows; i++) {
-            for (int j = 0; j < resultCols; j++) {
-                Scalar sum = Factory.buildScalar("0");
-                for (int k = 0; k < thisSize[1]; k++) { // thisSize[1] == otherSize[0]
-                    // sum = sum + this(i,k) * other(k,j)
-                    // Scalar.add 와 Scalar.multiply 는 새 객체를 반환하지 않고 자신을 수정함.
-                    // 따라서 다음과 같이 사용:
-                    // Scalar term = this.viewElement(i,k).clone(); // 원본 보존 위해 복제
-                    // term.multiply(other.viewElement(k,j));
-                    // sum.add(term);
-                    // 또는 static 메소드 사용:
-                    sum.add(Tensors.multiply(this.viewElement(i, k), other.viewElement(k, j)));
-                }
-                resultData[i][j] = sum;
-            }
-        }
-        // this의 내용을 resultData로 교체
-        // MatrixImpl(Scalar[][]) 생성자를 호출하여 새 객체를 만들고 그 내부 데이터로 교체하는 방식은
-        // this 참조 자체를 바꿀 수 없으므로, this의 내부 List<Vector>를 새로 구성해야 함.
-        List<Vector> newRows = new ArrayList<>(resultRows);
-        for (int i = 0; i < resultRows; i++) {
-            List<Scalar> rowScalars = new ArrayList<>(resultCols);
-            for (int j = 0; j < resultCols; j++) {
-                rowScalars.add(resultData[i][j]);
-            }
-            newRows.add(Factory.buildVector(rowScalars)); // Factory.buildVector(List<Scalar>) 필요
-        }
-        this.matrixRows = newRows;
+    @Override
+    public Matrix multiplyRight(Matrix other){
+        this.matrixRows = Tensors.multiply(this, other).getVectors();
         return this;
     }
 
@@ -516,11 +521,6 @@ public class MatrixImpl implements Matrix {
         return size[0] == size[1]; // 0x0도 정사각으로 간주 가능
     }
 
-    // Helper for triangular checks:
-    private boolean isZero(Scalar s) {
-        return s.getValue().compareTo(BigDecimal.ZERO) == 0;
-    }
-
     // 41. 상삼각 행렬
     @Override
     public boolean isUpperTriangular() {
@@ -533,7 +533,7 @@ public class MatrixImpl implements Matrix {
 
         for (int i = 0; i < size[0]; i++) {
             for (int j = 0; j < i; j++) { // 주 대각선 아래 요소 (row > col)
-                if (!isZero(this.viewElement(i, j))) {
+                if (!this.viewElement(i, j).isZero()) {
                     return false;
                 }
             }
@@ -553,7 +553,7 @@ public class MatrixImpl implements Matrix {
 
         for (int i = 0; i < size[0]; i++) {
             for (int j = i + 1; j < size[1]; j++) { // 주 대각선 위 요소 (col > row)
-                if (!isZero(this.viewElement(i, j))) {
+                if (this.viewElement(i, j).isZero()) {
                     return false;
                 }
             }
@@ -574,7 +574,7 @@ public class MatrixImpl implements Matrix {
                 if (i == j) { // Diagonal
                     if (element.getValue().compareTo(BigDecimal.ONE) != 0) return false;
                 } else { // Off-diagonal
-                    if (!isZero(element)) return false;
+                    if (!element.isZero()) return false;
                 }
             }
         }
@@ -589,7 +589,7 @@ public class MatrixImpl implements Matrix {
 
         for (int i = 0; i < size[0]; i++) {
             for (int j = 0; j < size[1]; j++) {
-                if (!isZero(this.viewElement(i, j))) {
+                if (!this.viewElement(i, j).isZero()) {
                     return false;
                 }
             }
@@ -723,15 +723,12 @@ public class MatrixImpl implements Matrix {
 
         if (rowCount == 0 || columnCount == 0) return tempMatrix; // 빈 행렬은 그대로
 
-        Scalar zero = Factory.buildScalar("0");
-        Scalar one = Factory.buildScalar("1");
-
         for (int r = 0; r < rowCount; r++) {
             if (lead >= columnCount) {
                 break;
             }
             int i = r;
-            while (tempMatrix.viewElement(i, lead).equals(zero)) {
+            while (tempMatrix.viewElement(i, lead).isZero()) {
                 i++;
                 if (i == rowCount) {
                     i = r;
@@ -745,14 +742,12 @@ public class MatrixImpl implements Matrix {
             tempMatrix.swapRows(i, r);
 
             Scalar pivot = tempMatrix.viewElement(r, lead);
-            if (!pivot.equals(zero) && !pivot.equals(one)) {
+            if (!pivot.isZero() && !pivot.isOne()) {
                 // 행을 pivot으로 나누기: row[r] = row[r] / pivot
                 // Scalar inversePivot = one.clone().divide(pivot); // Scalar에 divide 메소드 필요
                 // 임시: BigDecimal 직접 사용
-                BigDecimal pivotValue = pivot.getValue();
-                if (pivotValue.compareTo(BigDecimal.ZERO) == 0) throw new SingularMatrixException("Pivot is zero, cannot divide by zero during RREF.");
 
-                Scalar inversePivot = Factory.buildScalar(BigDecimal.ONE.divide(pivotValue, 10, RoundingMode.HALF_UP).toString()); // 정밀도 문제 주의
+                Scalar inversePivot = Factory.buildScalar(BigDecimal.ONE.divide(pivot.getValue(), 10, RoundingMode.HALF_UP).toString()); // 정밀도 문제 주의
                 tempMatrix.multiplyRow(r, inversePivot);
             }
 
@@ -782,8 +777,8 @@ public class MatrixImpl implements Matrix {
         if (rows == 0) return true; // 0xN 행렬은 RREF (자명하게)
         if (cols == 0 && rows > 0) return true; // Mx0 행렬도 RREF (자명하게)
 
-        Scalar zero = Factory.buildScalar("0");
-        Scalar one = Factory.buildScalar("1");
+//        Scalar zero = Factory.buildScalar("0");
+//        Scalar one = Factory.buildScalar("1");
         int lead = -1; // 이전 행의 선행 1의 열 인덱스
 
         for (int r = 0; r < rows; r++) {
@@ -795,8 +790,8 @@ public class MatrixImpl implements Matrix {
 
             for (int c = 0; c < cols; c++) {
                 Scalar currentElement = viewElement(r, c);
-                if (!currentElement.equals(zero)) { // 첫 non-zero 원소 발견
-                    if (!currentElement.equals(one)) return false; // 조건 1 위반 (피봇이 1이 아님)
+                if (!currentElement.isZero()) { // 첫 non-zero 원소 발견
+                    if (!currentElement.isOne()) return false; // 조건 1 위반 (피봇이 1이 아님)
                     currentLead = c; // 현재 행의 피봇 열 인덱스
                     break;
                 }
@@ -808,7 +803,7 @@ public class MatrixImpl implements Matrix {
 
                 // 조건 3 검사: 피봇 열의 다른 모든 원소가 0인지
                 for (int i = 0; i < rows; i++) {
-                    if (i != r && !viewElement(i, currentLead).equals(zero)) {
+                    if (i != r && !viewElement(i, currentLead).isZero()) {
                         return false; // 조건 3 위반
                     }
                 }
@@ -816,7 +811,7 @@ public class MatrixImpl implements Matrix {
                 // 이 행 아래의 모든 행도 0이어야 함
                 for (int next_r = r + 1; next_r < rows; next_r++) {
                     for (int c = 0; c < cols; c++) {
-                        if (!viewElement(next_r, c).equals(zero)) return false; // 0행 아래 non-zero 행 발견
+                        if (!viewElement(next_r, c).isZero()) return false; // 0행 아래 non-zero 행 발견
                     }
                 }
                 // 현재 행부터 맨 아래까지 모두 0이면 RREF 조건 만족하며 종료
