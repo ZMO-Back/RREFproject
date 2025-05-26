@@ -8,6 +8,9 @@ class ScalarImpl implements Scalar {
 
     // 01
     ScalarImpl(String ss) {
+        if (ss == null) {
+            throw new IllegalArgumentException("Value cannot be null.");
+        }
         try {
             this.scalar = new BigDecimal(ss);
         } catch (NumberFormatException e) {
@@ -16,6 +19,9 @@ class ScalarImpl implements Scalar {
     }
 
     ScalarImpl(BigDecimal bd) { // BigDecimal을 직접 받는 생성자 추가 (내부 사용 편의)
+        if(bd == null) {
+            throw new IllegalArgumentException("Value cannot be null.");
+        }
         this.scalar = bd;
     }
 
@@ -73,15 +79,7 @@ class ScalarImpl implements Scalar {
     // 17s. 객체 복제 (deep copy)
     @Override
     public Scalar clone() {
-        try {
-            // BigDecimal is immutable, so direct assignment is fine for a deep copy of its state.
-            ScalarImpl cloned = (ScalarImpl) super.clone(); // 기본적으로 얕은 복사지만, BigDecimal이 불변이라 문제 없음
-            // 만약 BigDecimal이 가변 객체였다면 cloned.scalar = new BigDecimal(this.scalar.toString()); 와 같이 새로 생성해야함
-            return new ScalarImpl(this.scalar); // 새 객체를 생성하여 BigDecimal 값을 복사하는 것이 더 명확
-        } catch (CloneNotSupportedException e) {
-            // This should not happen since we are Cloneable
-            throw new AssertionError(e);
-        }
+        return new ScalarImpl(this.scalar); // 새 객체를 생성하여 BigDecimal 값을 복사하는 것이 더 명확
     }
 
     // 18. 스칼라 덧셈 (non-static, modifies self)
@@ -98,5 +96,17 @@ class ScalarImpl implements Scalar {
         if (other == null) throw new IllegalArgumentException("Other scalar cannot be null for multiplication.");
         this.scalar = this.scalar.multiply(other.getValue());
         return this;
+    }
+
+    // Helper for triangular checks:
+    @Override
+    public boolean isZero() {
+        return this.getValue().compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    // Helper for triangular checks:
+    @Override
+    public boolean isOne() {
+        return this.getValue().compareTo(BigDecimal.ONE) == 0;
     }
 }
