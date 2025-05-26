@@ -2,7 +2,7 @@ package tensor;
 
 import java.math.BigDecimal;
 
-public interface Scalar extends Cloneable, Comparable<Scalar> {
+public interface Scalar extends Comparable<Scalar> {
     // 12. 값 조회
     BigDecimal getValue();
 
@@ -17,6 +17,10 @@ public interface Scalar extends Cloneable, Comparable<Scalar> {
 
     // 19. 스칼라 곱셈 (non-static, modifies self)
     Scalar multiply(Scalar other);
+
+    public boolean isZero();
+
+    public boolean isOne();
 
     // --- Default static methods ---
     // 24. 두 스칼라 덧셈 (static, returns new)
