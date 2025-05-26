@@ -346,7 +346,7 @@ public class Test {
         // 23. multiply (non-static, this = this * other)
         // m_a is now [[6,8],[10,12]]. m_c is Identity(2)
         System.out.println("m_a before multiply by Identity:\n" + m_a);
-        m_a.multiply(m_c); // m_a = m_a * I (should remain same)
+        m_a.multiplyRight(m_c); // m_a = m_a * I (should remain same)
         System.out.println("m_a after m_a.multiply(Identity):\n" + m_a);
 
         Matrix m_d = Factory.buildMatrix(new double[][]{{1,2,3},{4,5,6}}); // 2x3
@@ -356,7 +356,7 @@ public class Test {
         // [[7+18+33, 8+20+36], [28+45+66, 32+50+72]]
         // [[58, 64], [139, 154]]
         System.out.println("m_d (2x3) original:\n" + m_d);
-        m_d.multiply(m_e);
+        m_d.multiplyRight(m_e);
         System.out.println("m_d after m_d.multiply(m_e (3x2)) (result should be 2x2):\n" + m_d);
 
         // Reset for static tests
@@ -629,7 +629,7 @@ public class Test {
         Matrix m_exc4 = Factory.buildMatrix(2, 2, 1.0); // 2x2, incompatible (3 != 2)
         try {
             System.out.print("Test: m_exc3.multiply(m_exc4) (dim mismatch) -> ");
-            m_exc3.multiply(m_exc4);
+            m_exc3.multiplyRight(m_exc4);
         } catch (DimensionMismatchException e) {
             System.out.println("Caught expected: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
