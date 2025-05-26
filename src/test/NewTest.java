@@ -304,7 +304,9 @@ public class NewTest {
         Matrix mat = Factory.buildMatrix(new double[][]{{1,2},{3,4}}); // 09
         Matrix mat_copy_val = Factory.buildMatrix(new double[][]{{1,2},{3,4}}); // 09
         Matrix mat_other_val = Factory.buildMatrix(new double[][]{{1,2},{3,5}}); // 09
-
+        System.out.println("mat"+mat);
+        System.out.println("mat2"+mat_copy_val);
+        System.out.println("mat3"+mat_other_val);
         // 명세 13: (행렬) 행개수, 열개수 조회
         System.out.println("mat.getSize(): " + Arrays.toString(mat.getSize())); // 13
 
@@ -339,6 +341,9 @@ public class NewTest {
         Matrix m_a = Factory.buildMatrix(new double[][]{{1,2},{3,4}}); // 09
         Matrix m_b = Factory.buildMatrix(new double[][]{{5,6},{7,8}}); // 09
         Matrix m_c = Factory.buildMatrix(new double[][]{{1,0},{0,1}}); // 09 (Identity for testing)
+        System.out.println("m_a"+m_a);
+        System.out.println("m_b"+m_b);
+        System.out.println("m_c Identity"+m_c);
 
         // 명세 22: 행렬은 다른 행렬과 덧셈이 가능하다 (non-static, modifies self)
         System.out.println("m_a original:\n" + m_a); // 14m
@@ -347,20 +352,27 @@ public class NewTest {
 
         // 명세 23: 행렬은 다른 행렬과 곱셈이 가능하다 (non-static, modifies self, this = this * other)
         System.out.println("m_a before multiply by Identity:\n" + m_a); // 14m
-        m_a.multiply(m_c); // 23 (m_a = m_a * I)
+        m_a.multiplyRight(m_c); // 23 (m_a = m_a * I)
         System.out.println("m_a after m_a.multiply(Identity):\n" + m_a); // 14m
 
         Matrix m_d = Factory.buildMatrix(new double[][]{{1,2,3},{4,5,6}}); // 09 (2x3)
         Matrix m_e = Factory.buildMatrix(new double[][]{{7,8},{9,10},{11,12}}); // 09 (3x2)
         System.out.println("m_d (2x3) original:\n" + m_d); // 14m
-        m_d.multiply(m_e); // 23 (m_d = m_d * m_e, result 2x2)
-        System.out.println("m_d after m_d.multiply(m_e (3x2)) (result should be 2x2):\n" + m_d); // 14m
+        System.out.println("m_e (3x2) original:\n" + m_e); // 14m
+        m_d.multiplyRight(m_e); // 23 (m_d = m_d * m_e, result 2x2)
+        System.out.println("m_d after m_d.multiplyRight(m_e (3x2)) (result should be 2x2):\n" + m_d); // 14m
         // Note: 명세 23 also mentions "다른 행렬이 왼쪽 행렬로서 곱해지는 경우 (this = other * this)"
         // This specific non-static case for `this` modification is not directly tested here as `multiply` implements `this = this * other`.
+        m_d.multiplyLeft(m_d); // 23 (m_d = m_d * m_e, result 2x2)
+        System.out.println("m_d mult by itself:\n" + m_d); // 14m
+        m_d.multiplyLeft(m_e); // 23 (m_d = m_d * m_e, result 2x2)
+        System.out.println("m_d after m_d.multiplyLeft(m_e (3x2)) (result 3x2):\n" + m_d); // 14m
 
         // Reset for static tests
         m_a = Factory.buildMatrix(new double[][]{{1,0},{0,1}}); // 09
         m_b = Factory.buildMatrix(new double[][]{{2,3},{4,5}}); // 09
+        System.out.println("m_a"+m_a);
+        System.out.println("m_b"+m_b);
 
         // 명세 28: 전달받은 두 행렬의 덧셈이 가능하다 (static, returns new)
         Matrix sum_static_m = Tensors.add(m_a, m_b); // 28 (Interface static method)
@@ -636,7 +648,7 @@ public class NewTest {
         Matrix m_exc4 = Factory.buildMatrix(2, 2, 1.0); // 06 (2x2)
         try {
             System.out.print("Test: m_exc3.multiply(m_exc4) (dim mismatch) -> ");
-            m_exc3.multiply(m_exc4); // Expected: DimensionMismatchException (cols of m1 != rows of m2)
+            m_exc3.multiplyRight(m_exc4); // Expected: DimensionMismatchException (cols of m1 != rows of m2)
         } catch (DimensionMismatchException e) {
             System.out.println("Caught expected: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
